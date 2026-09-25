@@ -1,35 +1,43 @@
 name: Traffic Prediction CI
 
 on:
-    push:
-        branches:
-            - main
-            - dev
-            - feature/data-exploration
-
-    pull_request:
-        branches:
-            - main
-            - dev
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+  workflow_dispatch: # Allows manual execution of this workflow
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v7
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-            - name: Set up Python
-              uses: actions/setup-python@v7
-              with:
-                  python-version: "3.11"
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-            - name: Install dependencies
-              run: |
-                  python -m pip install --upgrade pip
-                  if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-            - name: Check Python files
-              run: |
-                  python -m compileall .
+      - name: Check code quality with Ruff
+        run: |
+          ruff check .
+
+      - name: Run unit tests with pytest
+        run: |
+          pytest tests/
+
+      - name: Python syntax check (compileall)
+        run: |
+          python -m compileall src/ backend/ config/ models/
