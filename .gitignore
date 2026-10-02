@@ -219,4 +219,3 @@ __marimo__/
 
 data/raw/*.csv.gz
 
-models/random_forest_traffic_model.pkl
