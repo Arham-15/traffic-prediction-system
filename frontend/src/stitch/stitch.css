@@ -1,0 +1,456 @@
+/* ------------------------------------------------------------------ */
+/* IntelliTraffic — Stitch frontend styles + theme system              */
+/* Supplements the Tailwind CDN tokens with Leaflet theming and the    */
+/* Stitch-styled map markers/HUD.                                      */
+/*                                                                     */
+/* THEME SYSTEM                                                        */
+/* The Tailwind config maps every semantic color to an "R G B"         */
+/* triplet variable below (rgb(var(--it-*) / <alpha-value>)), so all   */
+/* existing opacity utilities keep working.                            */
+/*   :root                 → Dark: the original cockpit, values        */
+/*                           identical to the previous hardcoded hexes */
+/*   [data-theme="light"]  → Light: designed light palette             */
+/* Flipping data-theme on <html> re-skins everything with no reload.   */
+/* ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --it-background: 14 19 33;
+  --it-surface: 14 19 33;
+  --it-surface-dim: 14 19 33;
+  --it-surface-bright: 52 57 72;
+  --it-surface-container-lowest: 9 14 28;
+  --it-surface-container-low: 22 27 42;
+  --it-surface-container: 26 31 46;
+  --it-surface-container-high: 37 42 57;
+  --it-surface-container-highest: 48 52 68;
+  --it-surface-variant: 48 52 68;
+
+  /* On-colors */
+  --it-on-background: 222 226 246;
+  --it-on-surface: 222 226 246;
+  --it-on-surface-variant: 185 202 203;
+
+  /* Primary (cyan identity) */
+  --it-primary: 219 252 255;
+  --it-on-primary: 0 54 58;
+  --it-primary-container: 0 240 255;
+  --it-on-primary-container: 0 105 112;
+  --it-primary-fixed: 125 244 255;
+  --it-on-primary-fixed: 0 32 34;
+  --it-primary-fixed-dim: 0 219 233;
+  --it-on-primary-fixed-variant: 0 79 84;
+  --it-surface-tint: 0 219 233;
+
+  /* Secondary (azure) */
+  --it-secondary: 173 198 255;
+  --it-on-secondary: 0 46 106;
+  --it-secondary-container: 5 102 217;
+  --it-on-secondary-container: 230 236 255;
+  --it-secondary-fixed: 216 226 255;
+  --it-secondary-fixed-dim: 173 198 255;
+  --it-on-secondary-fixed: 0 26 66;
+  --it-on-secondary-fixed-variant: 0 67 149;
+
+  /* Tertiary */
+  --it-tertiary: 248 244 255;
+  --it-on-tertiary: 16 0 169;
+  --it-tertiary-container: 215 214 255;
+  --it-on-tertiary-container: 73 75 215;
+  --it-tertiary-fixed: 225 224 255;
+  --it-tertiary-fixed-dim: 192 193 255;
+  --it-on-tertiary-fixed: 7 0 108;
+  --it-on-tertiary-fixed-variant: 47 46 190;
+
+  /* Error */
+  --it-error: 255 180 171;
+  --it-on-error: 105 0 5;
+  --it-error-container: 147 0 10;
+  --it-on-error-container: 255 218 214;
+
+  /* Inverse + outline */
+  --it-inverse-surface: 222 226 246;
+  --it-inverse-on-surface: 43 48 63;
+  --it-inverse-primary: 0 105 112;
+  --it-outline: 132 148 149;
+  --it-outline-variant: 59 73 75;
+
+  /* Map + Leaflet chrome */
+  --it-map-surface: 7 11 22;
+  --it-popup-bg: rgba(24, 28, 36, 0.96);
+  --it-popup-text: #dee2f6;
+  --it-popup-border: rgba(255, 255, 255, 0.08);
+  --it-popup-title: #7df4ff;
+  --it-popup-body: #b9cacb;
+  --it-attribution-bg: rgba(10, 14, 22, 0.78);
+  --it-attribution-text: #849495;
+  --it-attribution-link: #6ff6ff;
+  --it-sensor-chip-bg: #303444;
+  --it-sensor-chip-border: rgba(0, 240, 255, 0.4);
+  --it-sensor-chip-glow: rgba(0, 240, 255, 0.55);
+  --it-sensor-chip-icon: #00f0ff;
+  --it-layer-btn: #b9cacb;
+  --it-layer-btn-hover: #dee2f6;
+
+  /* Status text/chips (dark values = previous hardcoded ones) */
+  --it-status-info: #b9cacb;
+  --it-status-success: #4edea3;
+  --it-status-error: #ffb4ab;
+  --it-status-chip-border-info: rgba(185, 202, 203, 0.3);
+  --it-status-chip-border-success: rgba(78, 222, 163, 0.45);
+  --it-status-chip-border-error: rgba(255, 180, 171, 0.45);
+
+  /* Analytics SVG chart tokens */
+  --it-svg-muted: #b9cacb;
+  --it-svg-accent: #00f0ff;
+  --it-svg-secondary: #0566d9;
+  --it-svg-grid: rgba(255, 255, 255, 0.06);
+  --it-svg-panel: #161b2a;
+  --it-svg-panel-strong: #dee2f6;
+  --it-svg-panel-cyan: #7df4ff;
+  --it-svg-track: #1a1f2e;
+  --accent-current: #00f0ff;
+
+  /* Elevation */
+  --it-glass-shadow: 0 16px 36px -8px rgba(0, 5, 20, 0.65);
+  --it-card-shadow: 0 20px 48px rgba(0, 5, 20, 0.8);
+}
+
+/* ------------------------------------------------------------------ */
+/* Light theme — designed palette, same cyan/azure identity            */
+/* ------------------------------------------------------------------ */
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --it-background: 243 245 249;
+  --it-surface: 243 245 249;
+  --it-surface-dim: 216 220 228;
+  --it-surface-bright: 255 255 255;
+  --it-surface-container-lowest: 255 255 255;
+  --it-surface-container-low: 238 241 247;
+  --it-surface-container: 230 234 242;
+  --it-surface-container-high: 221 226 235;
+  --it-surface-container-highest: 210 216 227;
+  --it-surface-variant: 195 203 215;
+
+  --it-on-background: 27 34 49;
+  --it-on-surface: 27 34 49;
+  --it-on-surface-variant: 77 92 96;
+
+  --it-primary: 0 105 116;
+  --it-on-primary: 255 255 255;
+  --it-primary-container: 0 213 224;
+  --it-on-primary-container: 0 51 58;
+  --it-primary-fixed: 0 135 148;
+  --it-on-primary-fixed: 234 254 255;
+  --it-primary-fixed-dim: 0 105 116;
+  --it-on-primary-fixed-variant: 0 89 96;
+  --it-surface-tint: 0 151 167;
+
+  --it-secondary: 66 96 143;
+  --it-on-secondary: 255 255 255;
+  --it-secondary-container: 47 102 196;
+  --it-on-secondary-container: 234 240 255;
+  --it-secondary-fixed: 51 82 126;
+  --it-secondary-fixed-dim: 109 132 171;
+  --it-on-secondary-fixed: 242 245 252;
+  --it-on-secondary-fixed-variant: 217 228 248;
+
+  --it-tertiary: 67 70 126;
+  --it-on-tertiary: 255 255 255;
+  --it-tertiary-container: 201 200 240;
+  --it-on-tertiary-container: 60 62 180;
+  --it-tertiary-fixed: 75 77 168;
+  --it-tertiary-fixed-dim: 143 144 200;
+  --it-on-tertiary-fixed: 242 241 255;
+  --it-on-tertiary-fixed-variant: 217 216 255;
+
+  --it-error: 163 58 50;
+  --it-on-error: 255 255 255;
+  --it-error-container: 255 218 212;
+  --it-on-error-container: 110 18 16;
+
+  --it-inverse-surface: 43 48 63;
+  --it-inverse-on-surface: 238 241 247;
+  --it-inverse-primary: 77 223 232;
+  --it-outline: 111 127 136;
+  --it-outline-variant: 195 205 210;
+
+  --it-map-surface: 229 233 240;
+  --it-popup-bg: rgba(255, 255, 255, 0.97);
+  --it-popup-text: #1b2231;
+  --it-popup-border: rgba(15, 25, 40, 0.12);
+  --it-popup-title: #0369a1;
+  --it-popup-body: #46565e;
+  --it-attribution-bg: rgba(255, 255, 255, 0.82);
+  --it-attribution-text: #5a6a70;
+  --it-attribution-link: #0369a1;
+  --it-sensor-chip-bg: #ffffff;
+  --it-sensor-chip-border: rgba(0, 150, 165, 0.55);
+  --it-sensor-chip-glow: rgba(0, 180, 195, 0.45);
+  --it-sensor-chip-icon: #07808c;
+  --it-layer-btn: #4d5c60;
+  --it-layer-btn-hover: #1b2231;
+
+  --it-status-info: #5b6b70;
+  --it-status-success: #0c8f63;
+  --it-status-error: #b3261e;
+  --it-status-chip-border-info: rgba(91, 107, 112, 0.4);
+  --it-status-chip-border-success: rgba(12, 143, 99, 0.45);
+  --it-status-chip-border-error: rgba(179, 38, 30, 0.4);
+
+  --it-svg-muted: #5b6b70;
+  --it-svg-accent: #0090a5;
+  --it-svg-secondary: #2f66c4;
+  --it-svg-grid: rgba(20, 30, 45, 0.1);
+  --it-svg-panel: #ffffff;
+  --it-svg-panel-strong: #1b2231;
+  --it-svg-panel-cyan: #046570;
+  --it-svg-track: #dde2ea;
+  --accent-current: #0090a5;
+
+  --it-glass-shadow: 0 10px 28px -10px rgba(15, 25, 40, 0.18);
+  --it-card-shadow: 0 16px 40px -12px rgba(15, 25, 40, 0.16);
+}
+
+/* Subtle cross-fade while toggling. The class is added only for the
+   switch (theme.js) so initial page loads never animate. */
+html.theme-anim body,
+html.theme-anim body * {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    fill 0.25s ease,
+    stroke 0.25s ease,
+    box-shadow 0.25s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-anim body,
+  html.theme-anim body * {
+    transition: none !important;
+  }
+}
+
+/* Map major card shadows to theme tokens (selectors target the exact
+   arbitrary Tailwind classes used by the cockpit cards). */
+.shadow-\[0_16px_36px_-8px_rgba\(0\,5\,20\,0\.65\)\] {
+  box-shadow: var(--it-glass-shadow);
+}
+.shadow-\[0_20px_48px_rgba\(0\,5\,20\,0\.8\)\],
+.shadow-\[0_20px_48px_rgba\(0\,5\,20\,0\.7\)\],
+.shadow-\[0_12px_28px_rgba\(0\,5\,20\,0\.5\)\] {
+  box-shadow: var(--it-card-shadow);
+}
+
+/* Status text + corridor chip variants (theme-aware, set via JS classes) */
+.status-text-info { color: var(--it-status-info); }
+.status-text-success { color: var(--it-status-success); }
+.status-text-error { color: var(--it-status-error); }
+.status-chip-info {
+  color: var(--it-status-info);
+  border-color: var(--it-status-chip-border-info);
+}
+.status-chip-success {
+  color: var(--it-status-success);
+  border-color: var(--it-status-chip-border-success);
+}
+.status-chip-error {
+  color: var(--it-status-error);
+  border-color: var(--it-status-chip-border-error);
+}
+
+/* Themed map container background (replaces the old fixed #070b16) */
+.map-surface {
+  background-color: rgb(var(--it-map-surface));
+}
+
+/* ------------------------------------------------------------------ */
+/* Leaflet container                                                   */
+/* ------------------------------------------------------------------ */
+
+.leaflet-container {
+  background: rgb(var(--it-map-surface));
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  z-index: 0;
+}
+
+/* Dark map theme: CSS-inverted standard OSM tiles (no API key needed).
+   Light theme shows the tiles as-is. */
+.map-tiles-dark {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.92) saturate(0.65);
+}
+
+[data-theme="light"] .map-tiles-dark {
+  filter: none;
+}
+
+.leaflet-control-attribution {
+  background: var(--it-attribution-bg) !important;
+  color: var(--it-attribution-text) !important;
+  font-size: 10px !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--it-attribution-link) !important;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--it-popup-bg) !important;
+  color: var(--it-popup-text) !important;
+  border: 1px solid var(--it-popup-border);
+  box-shadow: 0 16px 36px -8px rgba(0, 5, 20, 0.4) !important;
+  border-radius: 0.5rem !important;
+}
+
+.leaflet-popup-content {
+  margin: 10px 14px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.stitch-popup strong {
+  display: block;
+  color: var(--it-popup-title);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.stitch-popup div {
+  color: var(--it-popup-body);
+}
+
+/* Pick mode — crosshair + cyan rim while the user is dropping a pin */
+.map-pick-mode {
+  cursor: crosshair !important;
+  outline: 1px solid rgba(0, 240, 255, 0.45);
+  outline-offset: -1px;
+}
+
+/* Severity-coloured PeMS corridor segments (real /traffic-map results) */
+.leaflet-interactive.stitch-corridor-segment {
+  stroke-linecap: round;
+  transition: stroke-opacity 0.2s ease;
+  cursor: pointer;
+}
+
+.leaflet-interactive.stitch-corridor-segment:hover {
+  stroke-opacity: 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stitch-styled divIcon markers                                       */
+/* ------------------------------------------------------------------ */
+
+/* Target beacon — mirrors the cockpit's pulsing cyan target marker */
+.stitch-user-marker {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #00f0ff;
+  border: 2px solid rgba(9, 14, 28, 0.9);
+  box-shadow:
+    0 0 0 4px rgba(0, 240, 255, 0.18),
+    0 0 16px #00f0ff;
+}
+
+.stitch-user-marker::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: 9999px;
+  border: 2px solid rgba(0, 240, 255, 0.6);
+  animation: stitch-user-ping 2.2s ease-out infinite;
+}
+
+@keyframes stitch-user-ping {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.75;
+  }
+
+  70%,
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stitch-user-marker::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* Nearest PeMS sensor — glowing chip with a sensors glyph */
+.stitch-sensor-marker {
+  width: 26px;
+  height: 26px;
+  border-radius: 0.375rem;
+  background: var(--it-sensor-chip-bg);
+  border: 1px solid var(--it-sensor-chip-border);
+  box-shadow: 0 0 12px var(--it-sensor-chip-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stitch-sensor-marker .material-symbols-outlined {
+  font-size: 14px;
+  color: var(--it-sensor-chip-icon);
+}
+
+/* ------------------------------------------------------------------ */
+/* Map layer toggle pills (Dark / Streets)                             */
+/* ------------------------------------------------------------------ */
+
+.dash-layer-btn,
+.full-layer-btn {
+  color: var(--it-layer-btn);
+}
+
+.dash-layer-btn:hover,
+.full-layer-btn:hover {
+  color: var(--it-layer-btn-hover);
+}
+
+.dash-layer-btn[aria-pressed="true"],
+.full-layer-btn[aria-pressed="true"] {
+  background: #00f0ff;
+  color: #00363a;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+}
+
+/* ------------------------------------------------------------------ */
+/* Native inputs follow the active theme                               */
+/* ------------------------------------------------------------------ */
+
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
+[data-theme="light"] input[type="date"],
+[data-theme="light"] input[type="time"] {
+  color-scheme: light;
+}
+
+/* ------------------------------------------------------------------ */
+/* Fullscreen map adjustments                                          */
+/* ------------------------------------------------------------------ */
+
+:fullscreen .stitch-view,
+:fullscreen #view-map>div {
+  height: 100vh;
+  border-radius: 0;
+}

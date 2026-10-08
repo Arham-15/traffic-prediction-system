@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1040 256" width="1040" height="256" role="img" aria-label="Geospatial sensor resolution">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#050c18"/><stop offset=".6" stop-color="#0a1426"/><stop offset="1" stop-color="#150f2b"/></linearGradient>
+<pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#1e3a5f" stroke-opacity=".25" stroke-width=".6"/></pattern>
+<filter id="blur" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
+<filter id="blur3" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="30"/></filter>
+<clipPath id="clip"><rect width="1040" height="256" rx="22"/></clipPath>
+</defs>
+<style>
+text{font-family:'Segoe UI',system-ui,-apple-system,Helvetica,Arial,sans-serif}
+.mono{font-family:'SFMono-Regular',Consolas,Menlo,'Liberation Mono',monospace}
+@keyframes pulse{0%,100%{stroke-opacity:.55}50%{stroke-opacity:1}}
+@keyframes glow{0%,100%{opacity:.15}50%{opacity:.5}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes dash{to{stroke-dashoffset:-20}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.pulse{animation:pulse 3s ease-in-out infinite}
+.glow{animation:glow 3s ease-in-out infinite}
+.rise{animation:rise .9s ease-out both}
+.flow{stroke-dasharray:4 6;animation:dash 1.2s linear infinite}
+.blink{animation:blink 2s ease-in-out infinite}
+</style>
+<g clip-path="url(#clip)">
+<rect width="1040" height="256" fill="url(#bg)"/>
+<rect width="1040" height="256" fill="url(#grid)"/>
+<ellipse cx="160" cy="70" rx="260" ry="110" fill="#22d3ee" opacity=".08" filter="url(#blur3)"><animateTransform attributeName="transform" type="translate" values="0 0;70 30;0 0" dur="14s" repeatCount="indefinite"/></ellipse>
+<ellipse cx="900" cy="176" rx="260" ry="110" fill="#a78bfa" opacity=".10" filter="url(#blur3)"><animateTransform attributeName="transform" type="translate" values="0 0;-70 -30;0 0" dur="16s" repeatCount="indefinite"/></ellipse>
+<g class="rise" style="animation-delay:0.0s">
+<rect x="30.0" y="36" width="164.0" height="84" rx="12" fill="#22d3ee" filter="url(#blur)" class="glow" style="animation-delay:0.0s"/>
+<rect x="30.0" y="36" width="164.0" height="84" rx="12" fill="#0b1a2e" fill-opacity=".94" stroke="#22d3ee" stroke-width="1.5" class="pulse" style="animation-delay:0.0s"/>
+<text x="40.0" y="52" font-size="9" fill="#22d3ee" fill-opacity=".85" class="mono">01</text>
+<g transform="translate(100.0,50.0) scale(1.0)" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></g>
+<text x="112.0" y="92" text-anchor="middle" font-size="14" font-weight="700" fill="#f1f7ff">Request</text>
+<text x="112.0" y="109" text-anchor="middle" font-size="10" fill="#8aa0bd">lat / lon</text></g><path id="p73" d="M194.0 78H234.0" fill="none" stroke="#22d3ee" stroke-opacity=".5" stroke-width="1.4" class="flow"/><circle r="6" fill="#22d3ee" opacity=".35"><animateMotion dur="1.6s" begin="0.0s" repeatCount="indefinite"><mpath xlink:href="#p73" href="#p73"/></animateMotion></circle><circle r="2.8" fill="#fff"><animateMotion dur="1.6s" begin="0.0s" repeatCount="indefinite"><mpath xlink:href="#p73" href="#p73"/></animateMotion></circle><g class="rise" style="animation-delay:0.15s">
+<rect x="234.0" y="36" width="164.0" height="84" rx="12" fill="#22d3ee" filter="url(#blur)" class="glow" style="animation-delay:0.15s"/>
+<rect x="234.0" y="36" width="164.0" height="84" rx="12" fill="#0b1a2e" fill-opacity=".94" stroke="#22d3ee" stroke-width="1.5" class="pulse" style="animation-delay:0.15s"/>
+<text x="244.0" y="52" font-size="9" fill="#22d3ee" fill-opacity=".85" class="mono">02</text>
+<g transform="translate(304.0,50.0) scale(1.0)" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></g>
+<text x="316.0" y="92" text-anchor="middle" font-size="14" font-weight="700" fill="#f1f7ff">Haversine</text>
+<text x="316.0" y="109" text-anchor="middle" font-size="10" fill="#8aa0bd">great-circle distance</text></g><path id="p74" d="M398.0 78H438.0" fill="none" stroke="#22d3ee" stroke-opacity=".5" stroke-width="1.4" class="flow"/><circle r="6" fill="#22d3ee" opacity=".35"><animateMotion dur="1.6s" begin="0.0s" repeatCount="indefinite"><mpath xlink:href="#p74" href="#p74"/></animateMotion></circle><circle r="2.8" fill="#fff"><animateMotion dur="1.6s" begin="0.0s" repeatCount="indefinite"><mpath xlink:href="#p74" href="#p74"/></animateMotion></circle><g class="rise" style="animation-delay:0.3s">
+<rect x="438.0" y="36" width="164.0" height="84" rx="12" fill="#38bdf8" filter="url(#blur)" class="glow" style="animation-delay:0.3s"/>
+<rect x="438.0" y="36" width="164.0" height="84" rx="12" fill="#0b1a2e" fill-opacity=".94" stroke="#38bdf8" stroke-width="1.5" class="pulse" style="animation-delay:0.3s"/>
+<text x="448.0" y="52" font-size="9" fill="#38bdf8" fill-opacity=".85" class="mono">03</text>
+<g transform="translate(508.0,50.0) scale(1.0)" fill="none" stroke="#38bdf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></g>
+<text x="520.0" y="92" text-anchor="middle" font-size="14" font-weight="700" fill="#f1f7ff">50 km gate</text>
+<text x="520.0" y="109" text-anchor="middle" font-size="10" fill="#8aa0bd">reject if farther</text></g><path id="p75" d="M602.0 78H642.0" fill="none" stroke="#38bdf8" stroke-opacity=".5" stroke-width="1.4" class="flow"/><circle r="6" fill="#38bdf8" opacity=".35"><animateMotion dur="1.6s" begin="0.0s" repeatCount="indefinite"><mpath xlink:href="#p75" href="#p75"/></animateMotion></circle><circle r="2.8" fill="#fff"><animateMotion dur="1.6s" begin="0.0s" repeatCount="indefinite"><mpath xlink:href="#p75" href="#p75"/></animateMotion></circle><g class="rise" style="animation-delay:0.44999999999999996s">
+<rect x="642.0" y="36" width="164.0" height="84" rx="12" fill="#a78bfa" filter="url(#blur)" class="glow" style="animation-delay:0.44999999999999996s"/>
+<rect x="642.0" y="36" width="164.0" height="84" rx="12" fill="#0b1a2e" fill-opacity=".94" stroke="#a78bfa" stroke-width="1.5" class="pulse" style="animation-delay:0.44999999999999996s"/>
+<text x="652.0" y="52" font-size="9" fill="#a78bfa" fill-opacity=".85" class="mono">04</text>
+<g transform="translate(712.0,50.0) scale(1.0)" fill="none" stroke="#a78bfa" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v14c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></g>
+<text x="724.0" y="92" text-anchor="middle" font-size="14" font-weight="700" fill="#f1f7ff">Nearest sensors</text>
+<text x="724.0" y="109" text-anchor="middle" font-size="10" fill="#8aa0bd">1 predict · up to 8 map</text></g><path id="p76" d="M806.0 78H846.0" fill="none" stroke="#a78bfa" stroke-opacity=".5" stroke-width="1.4" class="flow"/><circle r="6" fill="#a78bfa" opacity=".35"><animateMotion dur="1.6s" begin="0.0s" repeatCount="indefinite"><mpath xlink:href="#p76" href="#p76"/></animateMotion></circle><circle r="2.8" fill="#fff"><animateMotion dur="1.6s" begin="0.0s" repeatCount="indefinite"><mpath xlink:href="#p76" href="#p76"/></animateMotion></circle><g class="rise" style="animation-delay:0.6s">
+<rect x="846.0" y="36" width="164.0" height="84" rx="12" fill="#a78bfa" filter="url(#blur)" class="glow" style="animation-delay:0.6s"/>
+<rect x="846.0" y="36" width="164.0" height="84" rx="12" fill="#0b1a2e" fill-opacity=".94" stroke="#a78bfa" stroke-width="1.5" class="pulse" style="animation-delay:0.6s"/>
+<text x="856.0" y="52" font-size="9" fill="#a78bfa" fill-opacity=".85" class="mono">05</text>
+<g transform="translate(916.0,50.0) scale(1.0)" fill="none" stroke="#a78bfa" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v4M12 11.5l-7 5M12 11.5l7 5"/></g>
+<text x="928.0" y="92" text-anchor="middle" font-size="14" font-weight="700" fill="#f1f7ff">LightGBM V2</text>
+<text x="928.0" y="109" text-anchor="middle" font-size="10" fill="#8aa0bd">real model prediction</text></g><path d="M30.0 160V168H150.3M277.7 168H398.0V160" fill="none" stroke="#22d3ee" stroke-opacity=".5"/><rect x="158.3" y="157" width="111.4" height="22" rx="11" fill="#0a1628" stroke="#22d3ee" stroke-opacity=".7"/><text x="214.0" y="172" text-anchor="middle" font-size="10.5" letter-spacing="2" fill="#22d3ee">01 · LOCATE</text><path d="M438.0 160V168H463.7M576.3 168H602.0V160" fill="none" stroke="#38bdf8" stroke-opacity=".5"/><rect x="471.7" y="157" width="96.6" height="22" rx="11" fill="#0a1628" stroke="#38bdf8" stroke-opacity=".7"/><text x="520.0" y="172" text-anchor="middle" font-size="10.5" letter-spacing="2" fill="#38bdf8">02 · GATE</text><path d="M642.0 160V168H758.6M893.4 168H1010.0V160" fill="none" stroke="#a78bfa" stroke-opacity=".5"/><rect x="766.6" y="157" width="118.8" height="22" rx="11" fill="#0a1628" stroke="#a78bfa" stroke-opacity=".7"/><text x="826.0" y="172" text-anchor="middle" font-size="10.5" letter-spacing="2" fill="#a78bfa">03 · PREDICT</text><path d="M30 192H1010" stroke="#1e3a5f" stroke-opacity=".9"/><circle cx="38" cy="219" r="4" fill="#22d3ee" class="blink"/><text x="56" y="223" font-size="12.5" fill="#cfe3ff">Coordinates → nearest real PeMS sensors → 50 km support gate → LightGBM V2.</text><text x="56" y="241" font-size="10.5" fill="#6b84a6">Coverage is limited to the California PeMS network; IntelliTraffic does not claim global traffic coverage.</text></g><rect x=".5" y=".5" width="1039" height="255" rx="22" fill="none" stroke="#2a4a73" stroke-opacity=".8"/></svg>

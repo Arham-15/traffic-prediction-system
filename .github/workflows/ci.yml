@@ -40,4 +40,4 @@ jobs:
 
       - name: Python syntax check (compileall)
         run: |
-          python -m compileall src/ backend/ config/ models/
+          python -m compileall src/ tests/
