@@ -1,107 +1,363 @@
-<p align="center">
-  <img alt="IntelliTraffic — AI-Powered Traffic Prediction & Geospatial Intelligence" src="docs/assets/sections/hero.svg">
-</p>
+# IntelliTraffic — Development Guide
 
-IntelliTraffic predicts hourly traffic volume for a selected location and time by combining real
-California PeMS sensor observations, historical weather, and a production LightGBM V2 model behind a
-FastAPI backend and an interactive Vite + Leaflet map. Every value shown on the map is a real sensor
-with a real model prediction, not a simulated point.
+> **Development branch:** `dev`
+> This README is the technical guide for developing, testing, containerizing, and deploying IntelliTraffic.
 
-**Live Application:** https://www.intellitraffic.app/
+For the project overview, features, results, screenshots, demo, and other showcase information, refer to the `main` branch README.
 
 ---
 
-<a id="project-lead"></a>
-![Project Lead](docs/assets/sections/project-lead.svg)
+## 1. Development Scope
 
-### Arham Hassan
-*AI/ML & System Development*
+The `dev` branch is used for:
 
-Led the machine-learning pipeline, prediction architecture, backend integration, deployment workflow,
-and overall technical direction of IntelliTraffic.
+* Active feature development
+* ML/model development
+* Backend development
+* Frontend integration
+* Testing
+* Docker validation
+* CI/CD validation
+* Deployment preparation
 
-**Team**
-
-- Alfia Fareed
-- Darusha Javed
-- Abu Alam Siddiqui
-
----
-
-<a id="architecture"></a>
-![IntelliTraffic Architecture](docs/assets/sections/architecture.svg)
-
-![IntelliTraffic Architecture](docs/assets/intellitraffic-architecture.svg)
-
-The system is a single linear pipeline: **Data → ML → API → Frontend → Map**. Real PeMS traffic and
-historical weather are transformed into a 20-feature vector, scored by LightGBM V2, served through
-FastAPI, and rendered by the Vite frontend as an interactive geospatial map of real sensor segments.
+Production-ready changes are promoted from `dev` to `main` only after validation.
 
 ---
 
-<a id="overview"></a>
-![Overview](docs/assets/sections/overview.svg)
+## 2. System Architecture
 
-IntelliTraffic turns real-world traffic data into location-aware predictions:
-
-- **Real California PeMS traffic observations** (2017–2021 hourly sensor volumes) provide the
-  historical traffic signal.
-- **Historical weather** from the Open-Meteo archive is aligned to each sensor and time; at inference
-  the caller supplies temperature, rain, snow, and cloudiness.
-- **LightGBM V2** is the single production regression model used by every endpoint.
-- **Geospatial sensor lookup** resolves a latitude/longitude request to the nearest real PeMS sensors.
-- **FastAPI** exposes the prediction and traffic-map endpoints.
-- **Vite frontend** (vanilla JavaScript) presents the controls and results.
-- **Interactive map** (Leaflet + CARTO/OpenStreetMap tiles) draws the returned sensor segments.
-
-The map segments correspond directly to **real PeMS sensor locations** and their **model predictions**.
-No artificial road segments or fabricated traffic values are generated.
-
----
-
-<a id="key-features"></a>
-![Key Features](docs/assets/sections/key-features.svg)
-
-| Feature | Description |
-| --- | --- |
-| AI traffic-volume prediction | Hourly vehicles/hour estimate from the production LightGBM V2 model. |
-| Real PeMS sensor data | Grounded in the California PeMS network (~8,600 sensors), not simulated traffic. |
-| Geospatial sensor lookup | Resolves coordinates to the nearest real sensors within a 50 km support gate. |
-| Historical weather integration | Weather variables are part of the training and inference feature set. |
-| Interactive traffic map | Leaflet map renders nearby sensors as severity-coloured segments. |
-| Traffic severity visualization | Predictions are banded into LOW / MODERATE / HIGH / SEVERE. |
-| Cloud deployment | Frontend and backend are deployed on Azure and served over HTTPS. |
-
----
-
-<a id="ai-ml-pipeline"></a>
-![AI / ML Pipeline](docs/assets/sections/ai-ml-pipeline.svg)
-
-The production model is a **LightGBM V2** gradient-boosted regressor, loaded at runtime from
-`models/traffic_lightgbm_v2.txt`. A single feature builder produces the exact input vector for both the
-`/predict` and `/traffic-map` endpoints.
-
-![AI / ML Pipeline](docs/assets/intellitraffic-ml-pipeline.svg)
-
-<details>
-<summary>View as Mermaid diagram</summary>
-
-```mermaid
-flowchart LR
-    H["PeMS traffic history<br/>2017-2021 reference"] --> F
-    W["Weather inputs<br/>temp / rain / snow / cloud"] --> F
-    T["Time features<br/>hour / dow / month / flags"] --> F
-    G["Geo features<br/>lat / lon / lanes"] --> F
-    F["20-feature vector"] --> M["LightGBM V2"]
-    M --> P["Predicted volume (veh/h)"]
-    P --> S["Severity band"]
+```text
+                    ┌──────────────────────┐
+                    │   California PeMS    │
+                    │    Traffic Data      │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │ Data Processing &    │
+                    │ Feature Engineering  │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │    LightGBM V2       │
+                    │   Traffic Model      │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │       FastAPI        │
+                    │      REST API        │
+                    └──────────┬───────────┘
+                               │
+                 ┌─────────────┴─────────────┐
+                 │                           │
+                 ▼                           ▼
+        ┌─────────────────┐         ┌─────────────────┐
+        │     Frontend    │         │  Traffic Map    │
+        │ Vite + JavaScript│        │    Leaflet      │
+        └─────────────────┘         └─────────────────┘
+                 │                           │
+                 └─────────────┬─────────────┘
+                               ▼
+                       User Interface
 ```
 
-</details>
+---
 
-### Production feature set
+## 3. Repository Structure
 
-The model consumes the following 20 features, in order (see `src/prediction_features.py`):
+```text
+traffic-prediction-system/
+│
+├── .github/
+│   └── workflows/
+│       └── ...
+│
+├── data/
+│   ├── raw/
+│   └── processed/
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── vite.config.*
+│
+├── models/
+│   └── traffic_lightgbm_v2.txt
+│
+├── notebooks/
+│
+├── scripts/
+│
+├── src/
+│   ├── main.py
+│   └── ...
+│
+├── tests/
+│
+├── .dockerignore
+├── .gitignore
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+└── README.md
+```
+
+The structure may change as the system evolves. New architectural components should be documented here when introduced.
+
+---
+
+# 4. Development Environment
+
+Recommended environment:
+
+```text
+OS              Windows / Linux / macOS
+Python          3.11
+Node.js         LTS
+Package Manager npm
+Backend         FastAPI
+Frontend        Vite
+ML              LightGBM
+Container       Docker
+Version Control Git
+```
+
+---
+
+# 5. Clone the Repository
+
+```powershell
+git clone https://github.com/Arham-15/traffic-prediction-system.git
+cd traffic-prediction-system
+```
+
+Switch to the development branch:
+
+```powershell
+git switch dev
+```
+
+Pull the latest changes:
+
+```powershell
+git pull origin dev
+```
+
+---
+
+# 6. Python Environment
+
+Create the virtual environment:
+
+```powershell
+py -3.11 -m venv .venv
+```
+
+Activate it:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Upgrade pip:
+
+```powershell
+python -m pip install --upgrade pip
+```
+
+Install dependencies:
+
+```powershell
+pip install -r requirements.txt
+```
+
+Verify Python:
+
+```powershell
+python --version
+```
+
+---
+
+# 7. Backend Development
+
+The backend is located in:
+
+```text
+src/
+```
+
+The FastAPI application entry point is:
+
+```text
+src/main.py
+```
+
+Start the development server:
+
+```powershell
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Local API:
+
+```text
+http://localhost:8000
+```
+
+Interactive API documentation:
+
+```text
+http://localhost:8000/docs
+```
+
+Alternative API documentation:
+
+```text
+http://localhost:8000/redoc
+```
+
+---
+
+# 8. API Development
+
+The API is responsible for:
+
+```text
+Request
+   ↓
+Input validation
+   ↓
+Location/sensor processing
+   ↓
+Feature preparation
+   ↓
+LightGBM prediction
+   ↓
+Response
+```
+
+The request schema is defined in the FastAPI application.
+
+Current prediction inputs include:
+
+```text
+latitude
+longitude
+date_time
+day_type
+temperature
+rain
+snow
+cloudiness
+```
+
+Example development request:
+
+```json
+{
+  "latitude": 38.5816,
+  "longitude": -121.4944,
+  "date_time": "2026-10-08T18:00:00",
+  "day_type": "Weekday",
+  "temperature": 24.0,
+  "rain": 0.0,
+  "snow": 0.0,
+  "cloudiness": 20.0
+}
+```
+
+Always verify the current schema through:
+
+```text
+http://localhost:8000/docs
+```
+
+when the API is modified.
+
+---
+
+# 9. Frontend Development
+
+The frontend is located in:
+
+```text
+frontend/
+```
+
+Install dependencies:
+
+```powershell
+cd frontend
+npm install
+```
+
+Start the development server:
+
+```powershell
+npm run dev
+```
+
+Vite will display the local development URL in the terminal.
+
+Typically:
+
+```text
+http://localhost:5173
+```
+
+---
+
+# 10. Frontend ↔ Backend
+
+During local development:
+
+```text
+Browser
+   │
+   ▼
+Vite Frontend
+localhost:5173
+   │
+   │ HTTP requests
+   ▼
+FastAPI
+localhost:8000
+   │
+   ▼
+LightGBM V2
+```
+
+The frontend must use the appropriate API base URL for the environment.
+
+Do not hard-code production URLs when environment-based configuration is available.
+
+---
+
+# 11. Machine Learning Development
+
+The current primary development model is:
+
+```text
+LightGBM V2
+```
+
+Model file:
+
+```text
+models/traffic_lightgbm_v2.txt
+```
+
+The model is trained using historical traffic information together with engineered temporal, geographic, road, and weather-related features.
+
+---
+
+# 12. Current Feature Pipeline
+
+The current continuous feature set includes:
 
 ```text
 traffic
@@ -120,203 +376,834 @@ rolling_mean_24
 latitude
 longitude
 lanes
+```
+
+Feature engineering must remain consistent between:
+
+```text
+Training
+   ↕
+Inference
+```
+
+A change to feature names, transformations, ordering, or preprocessing must be reflected in both sides.
+
+---
+
+# 13. Traffic Data
+
+The traffic model is based on California PeMS data.
+
+The project uses traffic sensor metadata for geographic lookup and map-related functionality.
+
+Important development assets include:
+
+```text
+data/raw/
+data/processed/
+```
+
+Large raw datasets should not be committed to Git unless explicitly required.
+
+---
+
+# 14. Weather Data
+
+Historical weather information is aligned with traffic data geographically and temporally.
+
+Weather-related inputs currently include:
+
+```text
 temperature
 rain
 snow
 cloudiness
 ```
 
-- **Lag features** capture recent and periodic traffic: `traffic_lag_1/2/3` are the previous three
-  hours, `traffic_lag_24` is the same hour one day earlier, and `traffic_lag_168` is the same hour one
-  week earlier.
-- **Rolling features** smooth short-term noise: `rolling_mean_3` averages the last 3 hours and
-  `rolling_mean_24` the last 24 hours.
-- Lag and rolling values are read from real PeMS history ending at the mapped historical reference
-  time (see [Historical Prediction Mapping](#historical-prediction-mapping)).
+Production predictions should use real or appropriately sourced values.
 
-Predicted volumes are classified into severity bands calibrated to the model's observed output range
-(0–993 vehicles/hour):
-
-| Band | Predicted volume (veh/h) |
-| --- | --- |
-| LOW | `< 200` |
-| MODERATE | `200 – 399` |
-| HIGH | `400 – 599` |
-| SEVERE | `>= 600` |
+Do not introduce random or fabricated weather values into the production prediction pipeline.
 
 ---
 
-<a id="geospatial-intelligence"></a>
-![Geospatial Intelligence](docs/assets/sections/geospatial-intelligence.svg)
+# 15. Geographic Scope
 
-![Geospatial sensor resolution](docs/assets/intellitraffic-geospatial.svg)
+The current traffic model is trained on California PeMS traffic data.
 
-IntelliTraffic resolves requests against the real California PeMS sensor network rather than generating
-map points.
+Therefore, traffic prediction is currently limited by the training domain.
 
-- **~8,600 California PeMS sensors** are loaded from `data/raw/largest/ca_meta.csv`.
-- Each sensor carries **latitude/longitude** plus district, county, freeway, lanes, type, and direction.
-- A haversine (great-circle) distance finds the **nearest sensors** to a requested coordinate.
-- `/predict` uses the single nearest sensor; `/traffic-map` uses **up to 8 nearby sensors**, sorted
-  nearest-first, for map visualization.
-- A **50 km support gate** rejects locations farther than 50 km from any PeMS sensor before the model
-  runs, so predictions never silently map onto an unrelated sensor.
+Changing the latitude and longitude does **not** automatically make the model capable of predicting traffic for an unrelated country or region.
 
-Coverage is limited to the California PeMS network. IntelliTraffic does **not** claim global traffic
-coverage.
-
----
-
----
-
-<a id="technology-stack"></a>
-![Technology Stack](docs/assets/sections/technology-stack.svg)
-
-Versions reflect `requirements.txt`, `frontend/package.json`, and the `Dockerfile`.
-
-| Layer | Technology |
-| --- | --- |
-| Language / Runtime | Python 3.11 |
-| Machine Learning | LightGBM 4.7, scikit-learn 1.5 (metrics), pandas 2.2, NumPy 2.1, pyarrow 18.1, joblib 1.4 |
-| Backend / API | FastAPI 0.115, Uvicorn 0.30, Pydantic 2.9, httpx 0.27 |
-| Frontend | Vite 6, vanilla JavaScript (ES modules), HTML/CSS, Tailwind CSS (CDN) |
-| Maps | Leaflet 1.9.4 with CARTO basemaps (OpenStreetMap) |
-| Weather data | Open-Meteo historical archive API |
-| Traffic data | California PeMS |
-| Testing / Quality | pytest, Ruff |
-| Containerization | Docker (`python:3.11-slim`) |
-| Cloud | Azure Static Web Apps, Azure Container Apps, Azure Container Registry |
-
----
-
-<a id="repository-structure"></a>
-![Repository Structure](docs/assets/sections/repository-structure.svg)
-
-![Repository Structure](docs/assets/intellitraffic-repo-structure.svg)
-
-<details>
-<summary>View as plain text</summary>
+Supporting locations such as:
 
 ```text
-traffic-prediction-system/
-├── .github/workflows/ci.yml              # Ruff + pytest + compileall (Python 3.11)
-├── docs/assets/
-│   └── intellitraffic-architecture.svg   # Animated README hero visual
-├── frontend/                             # Vite + vanilla JS app (Leaflet map)
-│   ├── index.html
-│   ├── src/
-│   ├── package.json
-│   └── vite.config.js
-├── models/
-│   ├── traffic_lightgbm_v2.txt           # Production model (used at runtime)
-│   ├── traffic_lightgbm.txt              # Earlier training lineage
-│   └── traffic_lightgbm_continuous.txt   # Earlier training lineage
-├── notebooks/                            # Exploration / cleaning / feature engineering
-├── scripts/                              # Data prep, feature build, training, validation
-├── src/                                  # FastAPI backend
-│   ├── main.py                           # App, CORS, /predict, /traffic-map
-│   ├── prediction.py                     # LightGBM V2 inference
-│   ├── prediction_features.py            # 20-feature vector builder
-│   ├── traffic_history.py                # PeMS hourly history loader
-│   ├── history_time.py                   # 2026-2030 -> 2017-2021 mapping
-│   ├── sensor_lookup.py                  # Geospatial PeMS sensor resolution
-│   └── severity.py                       # Severity bands
-├── tests/
-│   ├── test_api.py                       # Endpoint + geospatial gate tests
-│   └── test_year_mapping.py              # Year-mapping + severity tests
-├── data/                                 # Raw + processed datasets (Git-ignored)
-├── Dockerfile
-├── requirements.txt
-├── pyproject.toml
-└── README.md
+Delhi
+Dubai
+Riyadh
+London
+Germany
 ```
 
-</details>
-
-Large raw/processed datasets under `data/` are excluded from Git (see [Security](#security)). The
-runtime still requires `models/traffic_lightgbm_v2.txt`, `data/raw/largest/ca_meta.csv`, and the
-hourly Parquet files under `data/processed/hourly/`.
+would require suitable traffic data, feature alignment, validation, and model training for those regions.
 
 ---
 
-<a id="api"></a>
-![API](docs/assets/sections/api.svg)
+# 16. Geospatial Processing
 
-The FastAPI backend exposes the prediction surface below. Interactive Swagger/ReDoc/OpenAPI
-documentation is intentionally **disabled in production**.
+The backend performs geographic sensor lookup using PeMS sensor metadata.
 
-![API request lifecycle](docs/assets/intellitraffic-api-flow.svg)
+The system can identify nearby traffic sensors for supported geographic requests.
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| `GET` | `/` | Service status and model name |
-| `POST` | `/predict` | Predict traffic volume for a location and time |
-| `POST` | `/traffic-map` | Predict the nearby real PeMS sensor segments |
-| `GET` | `/debug/cors` | Diagnostic view of the active CORS allow-list |
+Current development configuration uses nearby sensors with a maximum search distance of approximately:
 
-### `POST /predict`
-
-Request body:
-
-```json
-{
-  "latitude": 38.5816,
-  "longitude": -121.4944,
-  "date_time": "2026-10-07T18:00:00",
-  "day_type": "Weekday",
-  "temperature": 25,
-  "rain": 0,
-  "snow": 0,
-  "cloudiness": 20
-}
+```text
+50 km
 ```
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `latitude` / `longitude` | float | Requested location; resolved to the nearest PeMS sensor. |
-| `date_time` | string | Requested prediction timestamp (must fall in 2026–2030). |
-| `day_type` | string | `Weekday` or `Weekend`; must match the selected date. |
-| `temperature` | float | Temperature input for the weather features. |
-| `rain` | float | Rainfall input. |
-| `snow` | float | Snowfall input. |
-| `cloudiness` | float | Cloud cover input. |
+Geospatial functionality should be tested whenever changes are made to:
 
-The response includes the `prediction` (vehicles/hour), the requested `prediction_time`, the mapped
-`historical_reference_time`, the `severity` band, the resolved `sensor` (id, coordinates, distance,
-district, county, freeway, lanes, type, direction), the echoed `weather_input`, and the derived
-`day_type`.
-
-Requests are validated before the model runs: an inconsistent `day_type`, a date outside 2026–2030, or
-a location more than 50 km from any PeMS sensor returns `400`; a malformed or missing body returns
-`422`.
-
-### `POST /traffic-map`
-
-Accepts the same request body and applies the same validation, historical mapping, geographic gate,
-and LightGBM V2 model. It returns up to 8 nearby sensors as `segments` (each with real sensor metadata,
-`prediction`, and `severity`), plus `prediction_time`, `historical_reference_time`, `day_type`,
-`location`, and an `errors` list for any sensor whose history is unavailable.
+```text
+latitude
+longitude
+sensor lookup
+map endpoints
+distance calculations
+```
 
 ---
 
-<a id="local-development"></a>
-![Local Development](docs/assets/sections/local-development.svg)
+# 17. Testing
 
-### Backend
+Run the test suite from the repository root:
 
 ```powershell
-cd C:\PROJECTS\IntelliTraffic\traffic-prediction-system
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-uvicorn src.main:app --reload
+pytest -v
 ```
 
-The API runs at `http://127.0.0.1:8000`. Run from the repository root so the relative model and data
-paths resolve. Local runs require `models/traffic_lightgbm_v2.txt`, `data/raw/largest/ca_meta.csv`,
-and the hourly Parquet files under `data/processed/hourly/` (these datasets are not committed to Git).
+For a normal run:
 
-### Frontend
+```powershell
+pytest
+```
+
+Before merging a significant change, test:
+
+```text
+[ ] ML prediction
+[ ] API validation
+[ ] API response
+[ ] Geographic lookup
+[ ] Frontend/API communication
+[ ] Error handling
+[ ] Docker build
+```
+
+---
+
+# 18. Manual API Testing
+
+Start FastAPI:
+
+```powershell
+uvicorn src.main:app --reload --port 8000
+```
+
+Open:
+
+```text
+http://localhost:8000/docs
+```
+
+Test each relevant endpoint through Swagger UI.
+
+Verify:
+
+```text
+Valid request
+Invalid request
+Missing fields
+Invalid coordinates
+Invalid date/time
+Invalid weather values
+Unsupported location
+Model response
+```
+
+---
+
+# 19. Docker Development
+
+The backend can be built as a Docker image.
+
+From the repository root:
+
+```powershell
+docker build -t intellitraffic-api:dev .
+```
+
+Run:
+
+```powershell
+docker run --rm -p 8000:8000 intellitraffic-api:dev
+```
+
+Verify:
+
+```text
+http://localhost:8000/docs
+```
+
+---
+
+# 20. Docker Runtime Requirements
+
+The production container must contain the runtime assets required by the API.
+
+Important assets include:
+
+```text
+src/
+models/traffic_lightgbm_v2.txt
+data/raw/largest/ca_meta.csv
+data/processed/hourly/
+```
+
+Large training-only datasets should not be included in the production image unless they are required at runtime.
+
+Use:
+
+```text
+.dockerignore
+```
+
+to prevent unnecessary files from entering the Docker build context.
+
+---
+
+# 21. Docker Compose
+
+If the local Compose configuration is required:
+
+```powershell
+docker compose up --build
+```
+
+Stop services:
+
+```powershell
+docker compose down
+```
+
+View running containers:
+
+```powershell
+docker ps
+```
+
+View logs:
+
+```powershell
+docker logs <container-id>
+```
+
+---
+
+# 22. CI/CD
+
+GitHub Actions workflows are located in:
+
+```text
+.github/workflows/
+```
+
+The intended development pipeline is:
+
+```text
+Feature Branch
+      │
+      ▼
+Pull Request
+      │
+      ▼
+     dev
+      │
+      ▼
+CI Checks
+      │
+      ├── Tests
+      ├── Validation
+      └── Docker Build
+      │
+      ▼
+   Approved
+      │
+      ▼
+    main
+      │
+      ▼
+ Production
+```
+
+CI configuration should be updated whenever the project's build, test, or deployment requirements change.
+
+---
+
+# 23. CI/CD Principles
+
+CI/CD should verify the application before production promotion.
+
+Typical validation stages:
+
+```text
+Install dependencies
+        ↓
+Run tests
+        ↓
+Validate application
+        ↓
+Build Docker image
+        ↓
+Push image
+        ↓
+Deploy
+        ↓
+Verify deployment
+```
+
+Production credentials must be stored as repository/environment secrets rather than inside workflow files.
+
+---
+
+# 24. Azure Deployment
+
+The intended backend deployment architecture is:
+
+```text
+GitHub
+   ↓
+GitHub Actions
+   ↓
+Docker Image
+   ↓
+Azure Container Registry
+   ↓
+Azure Container Apps
+   ↓
+FastAPI
+```
+
+The frontend may be deployed separately as a static web application.
+
+---
+
+# 25. Container Registry
+
+Container images should use versioned tags.
+
+Example:
+
+```text
+intellitraffic-api:1.0
+intellitraffic-api:1.1
+intellitraffic-api:v2
+```
+
+For production, prefer traceable version tags so that a deployment can be associated with a specific source revision.
+
+Avoid depending exclusively on:
+
+```text
+latest
+```
+
+for production rollback and traceability.
+
+---
+
+# 26. Environment Configuration
+
+Environment-specific configuration should be provided through environment variables.
+
+Local development may use:
+
+```text
+.env
+```
+
+Never commit:
+
+```text
+.env
+```
+
+or credentials containing:
+
+```text
+API keys
+Azure credentials
+GitHub tokens
+Passwords
+Private keys
+Service credentials
+```
+
+Production secrets should be configured through the appropriate Azure/GitHub secret-management mechanism.
+
+---
+
+# 27. Branching Strategy
+
+### `main`
+
+Stable and production-ready code.
+
+```text
+main
+ ↓
+Production
+```
+
+### `dev`
+
+Active integration and testing branch.
+
+```text
+dev
+ ↓
+Development / Integration
+```
+
+### Feature branches
+
+Used for isolated development.
+
+Examples:
+
+```text
+feature/model-improvement
+feature/map-upgrade
+feature/api-update
+feature/frontend-update
+fix/api-error
+fix/docker-build
+```
+
+---
+
+# 28. Recommended Git Workflow
+
+Update `dev`:
+
+```powershell
+git switch dev
+git pull origin dev
+```
+
+Create a feature branch:
+
+```powershell
+git switch -c feature/<feature-name>
+```
+
+Develop and test.
+
+Check changes:
+
+```powershell
+git status
+git diff
+```
+
+Stage:
+
+```powershell
+git add .
+```
+
+Commit:
+
+```powershell
+git commit -m "feat: description of change"
+```
+
+Push:
+
+```powershell
+git push -u origin feature/<feature-name>
+```
+
+Create a Pull Request:
+
+```text
+feature/<feature-name>
+        ↓
+       dev
+```
+
+---
+
+# 29. Commit Convention
+
+Use descriptive commit messages.
+
+Recommended prefixes:
+
+```text
+feat:     New functionality
+fix:      Bug fix
+test:     Testing changes
+docs:     Documentation
+refactor: Code restructuring
+build:    Build/Docker changes
+ci:       CI/CD changes
+perf:     Performance improvements
+```
+
+Examples:
+
+```text
+feat: add traffic map endpoint
+fix: resolve prediction input validation
+test: add API prediction tests
+docs: update development guide
+build: optimize Docker image
+ci: update deployment workflow
+```
+
+---
+
+# 30. Pull Request Rules
+
+Before merging into `dev`:
+
+```text
+[ ] Feature works locally
+[ ] Tests pass
+[ ] CI passes
+[ ] No secrets committed
+[ ] No unnecessary large files
+[ ] API changes documented
+[ ] ML changes validated
+[ ] Docker tested when applicable
+```
+
+Before merging `dev` into `main`:
+
+```text
+[ ] Development branch is stable
+[ ] ML model validated
+[ ] API tested
+[ ] Frontend tested
+[ ] Docker image tested
+[ ] CI/CD passes
+[ ] Deployment verified
+```
+
+---
+
+# 31. Model Versioning
+
+Do not silently replace a validated model.
+
+Use explicit model versions:
+
+```text
+traffic_lightgbm_v1.txt
+traffic_lightgbm_v2.txt
+traffic_lightgbm_v3.txt
+```
+
+When introducing a new model, record:
+
+```text
+Model version
+Training data
+Feature set
+Validation metrics
+Training changes
+Inference changes
+Deployment version
+```
+
+The validated V1 model should remain available as a fallback/reference while newer versions are developed.
+
+---
+
+# 32. Model Validation
+
+A new model should be compared against the current baseline.
+
+Primary regression metrics:
+
+```text
+MAE
+RMSE
+R²
+```
+
+Also verify:
+
+```text
+No data leakage
+No unexpected missing values
+Correct feature schema
+Correct temporal alignment
+Correct geographic alignment
+Training/inference consistency
+```
+
+A model should not be promoted based on a single metric alone.
+
+---
+
+# 33. Data Integrity Rules
+
+Development code must not introduce:
+
+```text
+Random traffic values
+Random weather values
+Fake event values
+Artificial production sensor data
+```
+
+Training and inference data should be traceable to their intended sources.
+
+Any data transformation that affects model behavior should be documented.
+
+---
+
+# 34. Security Rules
+
+Never commit credentials or secrets.
+
+Before pushing:
+
+```powershell
+git status
+git diff
+```
+
+Review staged changes:
+
+```powershell
+git diff --cached
+```
+
+If a secret is accidentally committed:
+
+1. Revoke/rotate the secret immediately.
+2. Remove it from the repository.
+3. Check Git history if necessary.
+4. Replace it with a secure secret-management mechanism.
+
+---
+
+# 35. Troubleshooting
+
+## Backend does not start
+
+Check:
+
+```text
+Python version
+Virtual environment
+Dependencies
+Model file
+Required runtime data
+Port availability
+```
+
+Run:
+
+```powershell
+uvicorn src.main:app --reload --port 8000
+```
+
+---
+
+## Frontend cannot reach API
+
+Check:
+
+```text
+FastAPI is running
+API URL is correct
+CORS configuration
+Frontend environment configuration
+Browser DevTools network requests
+```
+
+---
+
+## Docker container fails
+
+Check:
+
+```powershell
+docker ps -a
+```
+
+Then:
+
+```powershell
+docker logs <container-id>
+```
+
+---
+
+## Docker build is unexpectedly large
+
+Check:
+
+```text
+.dockerignore
+Large datasets
+Virtual environment
+Node modules
+Temporary files
+Notebooks/output files
+```
+
+Training datasets should not unnecessarily become part of the production image.
+
+---
+
+## Prediction fails
+
+Check:
+
+```text
+Request schema
+Feature names
+Feature order
+Feature preprocessing
+Model version
+Model file
+Location support
+Date/time format
+Required runtime data
+```
+
+---
+
+# 36. Developer Checklist
+
+## Before Commit
+
+```text
+[ ] Code formatted/clean
+[ ] Feature tested
+[ ] Existing functionality checked
+[ ] Tests pass
+[ ] No secrets
+[ ] No unnecessary large files
+[ ] Git diff reviewed
+```
+
+## Before Pull Request
+
+```text
+[ ] Feature branch is up to date
+[ ] Tests pass
+[ ] API tested
+[ ] Frontend tested when applicable
+[ ] Docker tested when applicable
+[ ] Documentation updated
+```
+
+## Before Production
+
+```text
+[ ] dev is stable
+[ ] CI passes
+[ ] Model validated
+[ ] Backend tested
+[ ] Frontend tested
+[ ] Docker tested
+[ ] Azure configuration verified
+[ ] Production API verified
+[ ] Frontend connected to production API
+```
+
+---
+
+# 37. Development Lifecycle
+
+```text
+Requirement
+    ↓
+Implementation
+    ↓
+Local Testing
+    ↓
+Feature Branch
+    ↓
+Pull Request
+    ↓
+CI Validation
+    ↓
+dev
+    ↓
+Integration Testing
+    ↓
+Production Validation
+    ↓
+main
+    ↓
+Deployment
+    ↓
+Post-Deployment Verification
+```
+
+---
+
+# 38. Important Engineering Principles
+
+### Keep `main` stable
+
+Experimental work belongs in feature branches and `dev`.
+
+### Keep training and inference aligned
+
+A model is only reliable when the production feature pipeline matches the training pipeline.
+
+### Prefer real data
+
+Do not use fabricated production inputs.
+
+### Validate before promotion
+
+Every model, API, frontend, and deployment change should be tested before reaching production.
+
+### Keep deployments reproducible
+
+The same source revision should be traceable to the Docker image and deployment.
+
+### Keep the repository clean
+
+Do not commit unnecessary datasets, generated files, credentials, or local environments.
+
+---
+
+# 39. Quick Start
+
+For a new developer:
+
+```powershell
+git clone https://github.com/Arham-15/traffic-prediction-system.git
+cd traffic-prediction-system
+git switch dev
+
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+pip install -r requirements.txt
+
+uvicorn src.main:app --reload --port 8000
+```
+
+In another terminal:
 
 ```powershell
 cd frontend
@@ -324,158 +1211,33 @@ npm install
 npm run dev
 ```
 
-The Vite dev server runs at `http://localhost:5173`. Copy `frontend/.env.example` to a local env file
-and set `VITE_API_BASE_URL` (backend URL) and, for map tiles, `VITE_CARTO_API_KEY`.
-
----
-
-<a id="testing"></a>
-![Testing](docs/assets/sections/testing.svg)
-
-![Continuous integration](docs/assets/intellitraffic-ci.svg)
-
-Run the suite from the repository root:
-
-```powershell
-pytest
-```
-
-- `tests/test_api.py` — endpoint behaviour, 2026→2017 / 2030→2021 mapping through the API, day-type
-  validation, the geographic gate (out-of-region locations are rejected before the model runs), and the
-  50 km support boundary.
-- `tests/test_year_mapping.py` — deterministic year mapping, leap-day clamping, prediction-window
-  validation, and severity thresholds.
-
-Continuous integration (`.github/workflows/ci.yml`) runs on pushes and pull requests to `main` and
-`dev`, and on manual dispatch. Each run installs `requirements.txt`, then executes **Ruff** linting
-(`ruff check .`), **pytest** (`pytest tests/`), and a syntax check (`python -m compileall src/ tests/`)
-on Python 3.11. No coverage threshold is configured or claimed.
-
----
-
-<a id="docker"></a>
-![Docker](docs/assets/sections/docker.svg)
-
-![Docker build and run](docs/assets/intellitraffic-docker.svg)
-
-The backend is containerized from `python:3.11-slim`. The image installs `libgomp1` (the LightGBM
-native runtime dependency) and the pinned Python requirements, then bundles the production model and
-the runtime data it needs.
-
-```powershell
-docker build -t intellitraffic-api .
-docker run -p 8000:8000 intellitraffic-api
-```
-
-The container copies `src/`, the production model `models/traffic_lightgbm_v2.txt`, the sensor metadata
-`data/raw/largest/ca_meta.csv`, and the hourly Parquet store `data/processed/hourly/`, exposes port
-`8000`, and starts with `uvicorn src.main:app --host 0.0.0.0 --port 8000`.
-
----
-
-<a id="azure-deployment"></a>
-![Azure Deployment](docs/assets/sections/azure-deployment.svg)
-
-The production deployment separates the static frontend from the containerized backend:
-
-![Azure Deployment](docs/assets/intellitraffic-azure-deployment.svg)
-
-<details>
-<summary>View as plain text</summary>
+Then verify:
 
 ```text
-Azure Static Web Apps   (frontend)
-        |
-        v
-Azure Container Apps    (FastAPI backend)
-        ^
-        |
-Azure Container Registry (backend image)
+Frontend → FastAPI → LightGBM V2
 ```
 
-</details>
+API documentation:
 
-- **Azure Static Web Apps** hosts the built Vite frontend and serves it over HTTPS at
-  `https://www.intellitraffic.app/`.
-- **Azure Container Apps** runs the FastAPI backend as a managed container that the frontend calls
-  cross-origin over HTTPS.
-- **Azure Container Registry** stores the backend Docker image that Container Apps pulls on deploy.
-
-Allowed frontend origins are configured through the `ALLOWED_ORIGINS` environment variable. No
-credentials, subscription IDs, tokens, or secrets are stored in the repository.
+```text
+http://localhost:8000/docs
+```
 
 ---
 
-<a id="security"></a>
-![Security](docs/assets/sections/security.svg)
+## Development Branch Principle
 
-Verified practices in this repository:
+```text
+feature/*
+     ↓
+    dev
+     ↓
+ test + CI
+     ↓
+   main
+     ↓
+production
+```
 
-- Environment files are ignored: `.env`, `.env.*`, and `*.local` are excluded by `.gitignore`, while
-  `.env.example` is intentionally tracked as a safe configuration template.
-- No credentials are committed; the CARTO basemap key is supplied at build time via
-  `VITE_CARTO_API_KEY` and is not hardcoded in source.
-- Production API documentation is disabled (`docs_url`, `redoc_url`, and `openapi_url` are `None`).
-- CORS uses an explicit allow-list read from `ALLOWED_ORIGINS` (never `*`) with
-  `allow_credentials=False`.
-- Large datasets and trained binaries are excluded from Git: `data/raw/`, `data/processed/`,
-  `*.parquet`, `*.csv.gz`, and `*.pkl`. The runtime LightGBM V2 model is a plain-text `.txt` file.
-
----
-
-<a id="limitations"></a>
-![Limitations](docs/assets/sections/limitations.svg)
-
-- The model is trained on the **California PeMS** network; it is **not** a global traffic predictor.
-- The underlying observations are **historical (2017–2021)**.
-- **2026–2030** requests are mapped onto historical years; they are not real future observations.
-- Outputs are **model estimates**, not live traffic measurements.
-- There is **no live/real-time traffic feed**: weather is supplied by the caller at inference, and
-  historical weather (Open-Meteo) was used during training.
-- Locations more than **50 km** from a PeMS sensor are rejected by design.
-
----
-
-<a id="future-improvements"></a>
-![Future Improvements](docs/assets/sections/future-improvements.svg)
-
-- Live traffic feeds and real-time sensor ingestion
-- Broader and more diverse geographic datasets
-- Event / incident data integration
-- Route-level travel-time prediction
-- Uncertainty estimation for predictions
-- Model monitoring and drift detection
-- Automated retraining pipelines
-- Expanded geographic coverage
-
-These are directions for future work and are not implemented features.
-
----
-
-<a id="project-status"></a>
-![Project Status](docs/assets/sections/project-status.svg)
-
-IntelliTraffic is **deployed and functional**. The frontend is live at https://www.intellitraffic.app/,
-the FastAPI backend serves predictions from the LightGBM V2 model, and CI runs on the `main` and `dev`
-branches.
-
----
-
-<a id="credits"></a>
-![Credits](docs/assets/sections/credits.svg)
-
-**Project Lead:** Arham Hassan
-
-**Team:**
-
-- Alfia Fareed
-- Darusha Javed
-- Abu Alam Siddiqui
-
----
-
-<a id="license"></a>
-![License](docs/assets/sections/license.svg)
-
-No license file is currently included in this repository. IntelliTraffic is maintained as an
-**academic / portfolio project**; no open-source license has been applied yet.
+**`dev` is where IntelliTraffic is built.
+`main` is where validated IntelliTraffic is presented and released.**
