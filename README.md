@@ -1238,6 +1238,3 @@ feature/*
      ↓
 production
 ```
-
-**`dev` is where IntelliTraffic is built.
-`main` is where validated IntelliTraffic is presented and released.**
