@@ -1,0 +1,20 @@
+# Whitelist build context — only what the Dockerfile COPYs.
+# '**' ignores every file at every depth; '!' rules re-include exactly the
+# files the image needs, so registry builds upload ~1 GB, not tens of GB.
+**
+!requirements.txt
+!src/
+!src/**
+!models/
+!models/traffic_lightgbm_v2.txt
+!data/
+!data/raw/
+!data/raw/largest/
+!data/raw/largest/ca_meta.csv
+!data/processed/
+!data/processed/hourly/
+!data/processed/hourly/**
+
+# never ship caches
+**/__pycache__/
+**/*.py[cod]

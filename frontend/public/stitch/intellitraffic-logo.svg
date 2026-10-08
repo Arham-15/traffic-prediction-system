@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- IntelliTraffic logo: dark glass tile, cyan radar rings, traffic node -->
+  <defs>
+    <linearGradient id="itTile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#161b2a"/>
+      <stop offset="1" stop-color="#090e1c"/>
+    </linearGradient>
+    <linearGradient id="itGlyph" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7df4ff"/>
+      <stop offset="1" stop-color="#00f0ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#itTile)" stroke="#00f0ff" stroke-opacity="0.35" stroke-width="2"/>
+  <circle cx="32" cy="32" r="19" fill="none" stroke="#00f0ff" stroke-opacity="0.35" stroke-width="2" stroke-dasharray="4 5"/>
+  <circle cx="32" cy="32" r="12" fill="none" stroke="#00f0ff" stroke-opacity="0.6" stroke-width="2"/>
+  <line x1="32" y1="32" x2="46" y2="18" stroke="url(#itGlyph)" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="5" fill="url(#itGlyph)"/>
+  <circle cx="32" cy="32" r="2.2" fill="#090e1c"/>
+  <circle cx="46" cy="18" r="3" fill="#7df4ff"/>
+</svg>

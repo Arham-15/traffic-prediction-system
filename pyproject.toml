@@ -18,6 +18,7 @@ ignore = []
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = "-v"
+pythonpath = ["."]
 testpaths = [
     "tests",
 ]
