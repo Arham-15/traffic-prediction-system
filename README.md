@@ -9,6 +9,9 @@ with a real model prediction, not a simulated point.
 
 **Live Application:** https://www.intellitraffic.app/
 
+<img width="1535" height="863" alt="image" src="https://github.com/user-attachments/assets/09eb39a4-eee0-40df-b38a-3d7f191412c3" />
+
+
 ---
 
 <a id="project-lead"></a>
