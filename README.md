@@ -472,7 +472,6 @@ branches.
 
 - Alfia Fareed
 - Darusha Javed
-- Abu Alam Siddiqui
 
 ---
 
