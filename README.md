@@ -27,7 +27,6 @@ and overall technical direction of IntelliTraffic.
 
 - Alfia Fareed
 - Darusha Javed
-- Abu Alam Siddiqui
 
 ---
 
